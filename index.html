@@ -141,8 +141,8 @@
   <div class="wrap nav">
     <div class="brand"><span class="logo">⚔</span><span data-en="Java Fighting Game" data-zh="Java 文字战斗游戏">Java Fighting Game</span></div>
     <div class="lang-switch">
-      <button id="btnEn" class="active" onclick="setLang('en')">EN</button>
-      <button id="btnZh" onclick="setLang('zh')">中文</button>
+      <button id="btnEn" onclick="setLang('en')">EN</button>
+      <button id="btnZh" class="active" onclick="setLang('zh')">中文</button>
     </div>
   </div>
 </header>
@@ -158,7 +158,7 @@
   <div class="cta">
     <a class="btn btn-primary" href="game.html"><span data-en="▶ Play now" data-zh="▶ 立即游玩">▶ Play now</span></a>
     <a class="btn btn-ghost" href="https://github.com/wflbb123/java-fighting-game" target="_blank" rel="noopener">★ <span data-en="View on GitHub" data-zh="在 GitHub 查看">View on GitHub</span></a>
-    <a class="btn btn-ghost" href="README.zh.md" data-en-readme="README.md" target="_blank"><span data-en="Read the docs" data-zh="阅读文档">Read the docs</span></a>
+    <a class="btn btn-ghost" href="README.md" data-en-readme="README.en.md" target="_blank"><span data-en="Read the docs" data-zh="阅读文档">Read the docs</span></a>
   </div>
 </div>
 
@@ -347,7 +347,7 @@ Choose an option: 1. Login  2. Register  3. Play as guest  4. Exit</div>
     });
     // swap the docs link file
     var docs = document.querySelector('a[data-en-readme]');
-    if (docs) docs.setAttribute('href', (lang === 'zh') ? 'README.zh.md' : 'README.md');
+    if (docs) docs.setAttribute('href', (lang === 'zh') ? 'README.md' : 'README.en.md');
   }
   function showPanel(which){
     document.getElementById('tabEn').classList.toggle('active', which === 'en');
@@ -355,6 +355,9 @@ Choose an option: 1. Login  2. Register  3. Play as guest  4. Exit</div>
     document.getElementById('panelEn').classList.toggle('active', which === 'en');
     document.getElementById('panelZh').classList.toggle('active', which === 'zh');
   }
+
+  /* default to Chinese on load */
+  setLang('zh');
 </script>
 </body>
 </html>
