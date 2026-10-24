@@ -344,7 +344,10 @@ function setLang(l){
   document.documentElement.lang=(l==="zh")?"zh-CN":"en";
   document.getElementById("gEn").classList.toggle("active",l==="en");
   document.getElementById("gZh").classList.toggle("active",l==="zh");
-  document.querySelectorAll("[data-en]").forEach(el=>{ el.textContent=t(el.getAttribute("data-en")); });
+  // static labels: read data-zh / data-en directly (I18N keys are short keys, not full sentences)
+  document.querySelectorAll("[data-en]").forEach(el=>{
+    el.textContent=(l==="zh")?el.getAttribute("data-zh"):el.getAttribute("data-en");
+  });
   // refresh any visible dynamic text
   if(G.player) renderBattle();
 }
