@@ -1,74 +1,65 @@
-# Java Fighting Game (Console)
+# Java 文字战斗游戏（控制台）
 
-A simple turn-based console fighting game written in Java. It features an account
-system (login / register / guest play) and a battle loop where you fight waves of
-enemies, spend skill points, and grow stronger as you win.
+一个用 Java 编写的简单回合制控制台战斗游戏。包含账号系统（登录 / 注册 / 游客游玩）以及战斗循环：你将对战一波波敌人、分配属性点，并随胜利逐渐变强。**支持英文 / 中文双语，启动时可选择语言。**
 
-> **Bilingual:** the game supports **English / 中文** — pick a language at startup.
-> 中文说明见 [`README.zh.md`](README.zh.md).
-> A visual project page is available at [`index.html`](index.html).
-> A fully playable web version lives at [`game.html`](game.html) — open it in any browser to play the whole game.
+> 另有英文说明见 [`README.en.md`](README.en.md)。
+> 可在浏览器中直接游玩的网页版：[`game.html`](game.html)（打开即玩，无需安装）；项目主页见 [`index.html`](index.html)。
 
-## Features
+## 功能
 
-- **Account system** — register a new account or log in with an existing one.
-  - Account rules: 3–16 characters, letters and numbers only, not numbers-only.
-  - Password rules: 6–20 characters, letters and numbers only, not numbers-only.
-  - A captcha is shown on login.
-  - Accounts are locked after 3 failed password attempts.
-- **Guest mode** — play immediately without registering.
-- **Character creation** — allocate 20 skill points across HP / attack / defence.
-- **Turn-based combat** — fight randomly selected enemies with three actions:
-  1. Attack
-  2. Super attack (costs 10 HP, deals heavy damage)
-  3. Heal
-- **Progression** — enemies grow stronger each round; win 3 times in a row for an
-  attribute boost.
-- **Bilingual UI** — choose English or 中文 at startup; all text switches via a tiny
-  `i18n.Messages` helper.
+- **账号系统** —— 注册新账号或用已有账号登录。
+  - 账号规则：3–16 个字符，仅限字母和数字，不能全是数字。
+  - 密码规则：6–20 个字符，仅限字母和数字，不能全是数字。
+  - 登录时需要输入验证码。
+  - 连续输错密码 3 次账号将被锁定。
+- **游客模式** —— 无需注册即可直接游玩。
+- **角色创建** —— 将 20 点属性分配到 生命 / 攻击 / 防御。
+- **回合制战斗** —— 随机匹配敌人，每回合三种行动：
+  1. 攻击
+  2. 强力攻击（消耗 10 生命值，造成大量伤害）
+  3. 治疗
+- **成长** —— 敌人每轮都会变强；连胜 3 场可获得属性提升。
+- **双语支持** —— 启动时可选择 英文 / 中文，所有界面文本随之切换。
 
-## Requirements
+## 环境要求
 
-- Java JDK 8 or newer (tested with JDK 25).
+- JDK 8 或以上（使用 JDK 25 测试通过）。
 
-## How to build and run
+## 编译与运行
 
-From the `demo` directory:
+在 `demo` 目录下：
 
 ```bash
-# Compile
+# 编译
 javac -d bin src/App.java src/i18n/*.java src/domain/*.java src/ui/*.java
 
-# Run
+# 运行
 java -cp bin App
 ```
 
-Or open the `demo` folder in Visual Studio Code with the Java Extension Pack and
-use the provided launch configuration.
+或在 VS Code 中打开 `demo` 文件夹并安装 Java 扩展包，使用提供的启动配置。
 
-## How to play
+## 玩法
 
-1. Choose a language at startup: `1` = English, `2` = 中文.
-2. Choose an option from the login menu: `1` login, `2` register, `3` play as
-   guest, `4` exit.
-3. Allocate your 20 skill points when creating a character.
-4. Each turn, pick an action (`1` / `2` / `3`). Type `y`/`n` to continue or quit
-   between battles.
+1. 启动后先选择语言（输入 `1` 英文 / `2` 中文）。
+2. 在主菜单选择：1 登录，2 注册，3 游客游玩，4 退出。
+3. 创建角色时分配 20 点属性。
+4. 每回合选择行动（1 / 2 / 3）。两轮战斗之间输入 y/n 决定是否继续。
 
-## Project structure
+## 项目结构
 
 ```
 demo/
 ├── src/
-│   ├── App.java              # Entry point (language selection)
-│   ├── i18n/                 # Bilingual text (Messages)
-│   ├── domain/               # Game model (Character, Hero, Enemy, User)
-│   └── ui/                   # Login and FightingGame (game loop)
-├── lib/                      # Dependencies (currently none)
-└── bin/                      # Compiled output (git-ignored)
+│   ├── App.java              # 入口（含语言选择）
+│   ├── i18n/                 # 双语文本 Messages
+│   ├── domain/               # 游戏模型（Character、Hero、Enemy、User）
+│   └── ui/                   # Login 与 FightingGame（游戏主循环）
+├── lib/                      # 依赖（当前为空）
+└── bin/                      # 编译产物（已被 .gitignore 忽略）
 ```
 
-## Notes
+## 说明
 
-- All progress is in-memory; accounts are not persisted between runs.
-- See `OPTIMIZATION.md` for known issues and improvement ideas.
+- 所有进度仅存在于内存，重启后清空。
+- 已知问题与优化建议见 `OPTIMIZATION.md`。
