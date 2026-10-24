@@ -5,19 +5,20 @@ import java.util.Random;
 import java.util.Scanner;
 
 import domain.User;
+import i18n.Messages;
 
 public class Login {
     public void start(ArrayList<User> users){
         // create an user database
 
         System.out.println("________________________________");
-        System.out.println("___Welcome to the login page!___");
+        System.out.println("___" + Messages.t("Welcome to the login page!") + "___");
         System.out.println("________________________________");
 
         Scanner sc = new Scanner(System.in);
 
         while (true) {
-            System.out.println("Choose an option: 1. Login   2. Register   3. Play as guest   4. Exit");
+            System.out.println(Messages.t("Choose an option: 1. Login   2. Register   3. Play as guest   4. Exit"));
 
             String choice = sc.next();
 
@@ -33,11 +34,11 @@ public class Login {
                     exit();
                     break;
                 case "3":
-                    System.out.println("Playing as guest");
+                    System.out.println(Messages.t("Playing as guest"));
                     FightingGame fg = new FightingGame();
                     fg.gameStart("user");
                 default:
-                    System.out.println("Invalid input. Please try again.");
+                    System.out.println(Messages.t("Invalid input. Please try again."));
                     start(users);
 
             }
@@ -51,7 +52,7 @@ public class Login {
 
     public void login(ArrayList<User> users, Scanner sc){
 
-        System.out.println("login");
+        System.out.println(Messages.t("login"));
         String account;
 
         User u;
@@ -61,7 +62,7 @@ public class Login {
 
             if(findindex(users, account) == -1) 
                 {
-                    System.out.println("Account does not exist. Please type again.");
+                    System.out.println(Messages.t("Account does not exist. Please type again."));
                     continue;
                 }
 
@@ -69,10 +70,10 @@ public class Login {
 
             if (!u.getState())
                 {
-                System.out.println("Your account has been locked. Please contact your administrator or log in with another account.");
+                System.out.println(Messages.t("Your account has been locked. Please contact your administrator or log in with another account."));
             }
             else {
-                System.out.println("Account found. Please enter your password.");
+                System.out.println(Messages.t("Account found. Please enter your password."));
                 break;
                 }
             }
@@ -83,10 +84,10 @@ public class Login {
             password = verifypassword1(sc);
             if(!u.getPassword().equals(password))          
             {
-                System.out.println("Incorrect password. Please try again.");
+                System.out.println(Messages.t("Incorrect password. Please try again."));
                 LoginTimes++;                   
                 if(LoginTimes == 3){
-                    System.out.println("You have entered the wrong password 3 times. Your account is now locked. Please contact your administrator.");
+                    System.out.println(Messages.t("You have entered the wrong password 3 times. Your account is now locked. Please contact your administrator."));
                     u.setState(false);
                     break;
                 }
@@ -94,7 +95,7 @@ public class Login {
             }
             // 启动游戏
             else {
-                System.out.println("Login successful! The game will start shortly.");
+                System.out.println(Messages.t("Login successful! The game will start shortly."));
                 FightingGame fg = new FightingGame();
                 fg.gameStart(u.getAccount());
                 break;
@@ -104,16 +105,16 @@ public class Login {
 
     public void register(ArrayList<User> users, Scanner sc){
 
-        System.out.println("register");
+        System.out.println(Messages.t("register"));
 
         String account;
         
         while(true){
             account = verifyaccount(sc);
             
-            if(findindex(users, account) >= 0) System.out.println("Account already exists. Please choose a different account.");
+            if(findindex(users, account) >= 0) System.out.println(Messages.t("Account already exists. Please choose a different account."));
             else {
-                System.out.println("Account available. Please enter your password.");
+                System.out.println(Messages.t("Account available. Please enter your password."));
                 break;
             }
         }
@@ -131,25 +132,25 @@ public class Login {
 
         users.add(user);
 
-        System.out.println("Registration successful. Please log in.");
+        System.out.println(Messages.t("Registration successful. Please log in."));
     }
 
     // 检查账户是否合法
     public String verifyaccount(Scanner sc){
-        System.out.println("please input your account");
+        System.out.println(Messages.t("please input your account"));
 
         String account = null;
         while(true){
             account = sc.next();
 
             if (account == null) {
-                System.out.println("Account cannot be null. Please enter a valid account (3-16 characters).");
+                System.out.println(Messages.t("Account cannot be null. Please enter a valid account (3-16 characters)."));
             } else if (account.length() < 3 || account.length() > 16) {
-                System.out.println("Invalid account. Please enter a valid account (3-16 characters).");
+                System.out.println(Messages.t("Invalid account. Please enter a valid account (3-16 characters)."));
             } else if (!account.matches("^[a-zA-Z0-9]+$")) {
-                System.out.println("Invalid account. Please enter a valid account (letters and numbers only).");
+                System.out.println(Messages.t("Invalid account. Please enter a valid account (letters and numbers only)."));
             } else if (account.matches("^[0-9]+$")) {
-                System.out.println("Invalid account. Please enter a valid account (cannot be numbers only).");
+                System.out.println(Messages.t("Invalid account. Please enter a valid account (cannot be numbers only)."));
             } else {
                 break;
             }
@@ -161,13 +162,13 @@ public class Login {
     public String verifypassword(String password)
     {
         if (password == null) {
-            System.out.println("Password cannot be null. Please enter a valid password.");
+            System.out.println(Messages.t("Password cannot be null. Please enter a valid password."));
         } else if (password.length() < 6 || password.length() > 20) {
-            System.out.println("Invalid password. Please enter a valid password (6-20 characters).");
+            System.out.println(Messages.t("Invalid password. Please enter a valid password (6-20 characters)."));
         } else if (!password.matches("^[a-zA-Z0-9]+$")) {
-            System.out.println("Invalid password. Please enter a valid password (letters and numbers only).");
+            System.out.println(Messages.t("Invalid password. Please enter a valid password (letters and numbers only)."));
         } else if (password.matches("^[0-9]+$")) {
-            System.out.println("Invalid password. Please enter a valid password (cannot be numbers only).");
+            System.out.println(Messages.t("Invalid password. Please enter a valid password (cannot be numbers only)."));
         } else {
                 return password;
             }
@@ -177,7 +178,7 @@ public class Login {
 
     // 注册时获取密码
     public String verifypassword2(Scanner sc){
-        System.out.println("please input password: ");
+        System.out.println(Messages.t("please input password: "));
         String password = null;
         
         while(true){
@@ -190,7 +191,7 @@ public class Login {
 
     // 登录时获取密码
     public String verifypassword1(Scanner sc){
-        System.out.println("please input password: ");
+        System.out.println(Messages.t("please input password: "));
         String password = null;
 
         // 验证码
@@ -201,13 +202,13 @@ public class Login {
             testverifycode(sc);
 
             if (password == null) {
-                System.out.println("Password cannot be null. Please enter a valid password.");
+                System.out.println(Messages.t("Password cannot be null. Please enter a valid password."));
             } else if (password.length() < 6 || password.length() > 20) {
-                System.out.println("Invalid password. Please enter a valid password (6-20 characters).");
+                System.out.println(Messages.t("Invalid password. Please enter a valid password (6-20 characters)."));
             } else if (!password.matches("^[a-zA-Z0-9]+$")) {
-                System.out.println("Invalid password. Please enter a valid password (letters and numbers only).");
+                System.out.println(Messages.t("Invalid password. Please enter a valid password (letters and numbers only)."));
             } else if (password.matches("^[0-9]+$")) {
-                System.out.println("Invalid password. Please enter a valid password (cannot be numbers only).");
+                System.out.println(Messages.t("Invalid password. Please enter a valid password (cannot be numbers only)."));
             } else {
                     return password;
                 }
@@ -262,14 +263,14 @@ public class Login {
                 String rcode = verifycode();
                 System.out.println(rcode);
 
-                System.out.println("Please type the verification code (case-insensitive):");
+                System.out.println(Messages.t("Please type the verification code (case-insensitive):"));
                 String incode = sc.next();
                 if(rcode.equalsIgnoreCase(incode)) 
                 {
-                    System.err.println("Correct!");
+                    System.err.println(Messages.t("Correct!"));
                     break;
                 }
-                else System.err.println("Incorrect! Please try again.");
+                else System.err.println(Messages.t("Incorrect! Please try again."));
             }
     }
 
@@ -286,12 +287,12 @@ public class Login {
     {
         String confirmPassword = null;
 
-            System.out.println("please confirm your password: ");
+            System.out.println(Messages.t("please confirm your password: "));
             confirmPassword = sc.next();
 
             if (!password.equals(confirmPassword)){
         
-                System.out.println("passwords do not match,please try to type again!!!");
+                System.out.println(Messages.t("Passwords do not match. Please try again."));
                 return false;
             }
             
@@ -300,7 +301,7 @@ public class Login {
     
     public void exit(){
         
-        System.out.println("exit");
+        System.out.println(Messages.t("exit"));
         System.exit(0);
     }
 }
