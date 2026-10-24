@@ -6,18 +6,19 @@ import java.util.Scanner;
 
 import domain.EnemyCharacter;
 import domain.HeroCharacter;
+import i18n.Messages;
 
 public class FightingGame {
     public void gameStart(String username)
     {
         System.err.println("---------------------------");
-        System.err.println("-- Welcome, " + username + "!!!! --");
+        System.err.println("-- " + Messages.tf("Welcome, {0}!!!!", username) + " --");
         System.err.println("---------------------------");
 
         HeroCharacter player = creatPlayerCharacter(username);
-        System.out.println("Character created successfully!");
-        System.out.println("Your original attributes are: " + player.show());
-        System.out.println("Your original skills are: " + player.showskill());
+        System.out.println(Messages.t("Character created successfully!"));
+        System.out.println(Messages.tf("Your original attributes are: {0}", player.show()));
+        System.out.println(Messages.tf("Your original skills are: {0}", player.showskill()));
         
         // 创建敌方角色
         ArrayList<EnemyCharacter> enemylist = new ArrayList<>();
@@ -46,13 +47,13 @@ public class FightingGame {
                 }
             }
             EnemyCharacter enemy = enemylist.get(r.nextInt(enemylist.size()));
-            System.out.println("Your enemy is: " + enemy.show());
+            System.out.println(Messages.tf("Your enemy is: {0}", enemy.show()));
 
             // 战斗开始
             System.out.println("---------------------------");
-            System.out.println("__________ Game Start _______");
+            System.out.println("__________ " + Messages.t("Game Start") + " _______");
             System.out.println("");
-            System.out.println("Count " + count);
+            System.out.println(Messages.tf("Count {0}", count));
             System.out.println("");
 
             int round = 1;
@@ -60,7 +61,7 @@ public class FightingGame {
             while(player.isAlive())
             {
                 System.out.println("___________________________");
-                System.out.println("Round " + round);
+                System.out.println(Messages.tf("Round {0}", round));
 
                 System.out.println(getHealthBar(player.getName(),player.getHp(),player.getMax_Hp()));
                 System.out.println(getHealthBar(enemy.getName(),enemy.getHp(),enemy.getMax_Hp()));
@@ -71,7 +72,7 @@ public class FightingGame {
                 if(!enemy.isAlive())
                 {
                     win++;
-                    System.out.println("You defeated " + enemy.getName() + "! You win!!!");
+                    System.out.println(Messages.tf("You defeated {0}! You win!!!", enemy.getName()));
                     
                     break;
                 }
@@ -81,7 +82,7 @@ public class FightingGame {
 
                 if(!player.isAlive())
                 {
-                    System.err.println("You lost!!!");
+                    System.err.println(Messages.t("You lost!!!"));
                     
                     break;
                 }
@@ -94,25 +95,25 @@ public class FightingGame {
             {
                 int h = r.nextInt(21) + 20;
                 player.heal(h);
-                System.out.println("You recovered " + h + " HP");
+                System.out.println(Messages.tf("You recovered {0} HP", h));
                 System.out.println("_____________________________");
             }
 
             if(player.isAlive() && win % 3 == 0)
             {
-                System.out.println("You have won 3 times! You will receive an attribute boost.");
+                System.out.println(Messages.t("You have won 3 times! You will receive an attribute boost."));
 
                 player.setMax_Hp(player.getMax_Hp() + 30);
                 player.setAttack(player.getAttack() + 5);
                 player.setDefence(player.getDefence() + 3);
 
-                System.out.println("+30 HP, +5 attack, +3 defence");
-                System.out.println("Your attributes: " + player.show());
+                System.out.println(Messages.t("+30 HP, +5 attack, +3 defence"));
+                System.out.println(Messages.tf("Your attributes: {0}", player.show()));
             }
 
             if(player.isAlive())
             {
-                System.out.println("Would you like to continue? (y/n)");
+                System.out.println(Messages.t("Would you like to continue? (y/n)"));
                 Scanner sc = new Scanner(System.in);
 
                 String s = sc.next();
@@ -124,12 +125,12 @@ public class FightingGame {
                 }
                 else if(s.equalsIgnoreCase("n") ||s.equalsIgnoreCase("no"))
                 {
-                    System.out.println("Exit");
+                    System.out.println(Messages.t("Exit"));
                     break;
                 }
                 else
                 {
-                    System.out.println("Invalid input. Continuing by default.");
+                    System.out.println(Messages.t("Invalid input. Continuing by default."));
                     count++;
                     continue;
                 }
@@ -138,9 +139,9 @@ public class FightingGame {
 
         // 结算
         System.out.println("__________________");
-        System.out.println("Game over!");
-        System.err.println("You have defeated " + win + " enemies!!!");
-        System.out.println("Thank you for playing!");
+        System.out.println(Messages.t("Game over!"));
+        System.err.println(Messages.tf("You have defeated {0} enemies!!!", win));
+        System.out.println(Messages.t("Thank you for playing!"));
 
         System.exit(0);
 
@@ -152,27 +153,27 @@ public class FightingGame {
     {
         Scanner sc = new Scanner(System.in);
 
-        System.err.println("Create your character: ");
-        System.err.println("Your name is: "+username);
+        System.err.println(Messages.t("Create your character: "));
+        System.err.println(Messages.tf("Your name is: {0}", username));
 
         int point = 20;
-        System.err.println("You have 20 points. Please allocate skill points. (You have basic attributes.)");
+        System.err.println(Messages.t("You have 20 points. Please allocate skill points. (You have basic attributes.)"));
 
         String[] attributes = {"hp","attack","defence"};
         int[] values = new int[3];
 
         for(int i = 0;i < attributes.length;i++)
         {
-            System.out.println("Allocate your "+attributes[i]+": ");
+            System.out.println(Messages.tf("Allocate your {0}: ", attributes[i]));
             int input = sc.nextInt();
             if(input < 0)
             {
-                System.err.println("Cannot be negative! Allocating 0 points by default.");
+                System.err.println(Messages.t("Cannot be negative! Allocating 0 points by default."));
                 input = 0;
             }
             if(input > point)
             {
-                System.err.println("Exceeds available points! Allocating all remaining points.");
+                System.err.println(Messages.t("Exceeds available points! Allocating all remaining points."));
                 input = point;
                 values[i] = input;
                 break;
@@ -232,41 +233,40 @@ public class FightingGame {
     // 玩家回合
     public void playerTurn(HeroCharacter player,EnemyCharacter enemy)
     {
-        System.out.println("Your turn");
-        System.out.println("Choose your action:\n1. Attack\n2. Super attack (costs 10 HP, deals heavy damage)\n3. Heal\n");
+        System.out.println(Messages.t("Your turn"));
+        System.out.println(Messages.t("Choose your action:\n1. Attack\n2. Super attack (costs 10 HP, deals heavy damage)\n3. Heal\n"));
 
         Scanner sc = new Scanner(System.in);
         String choice = sc.next();
         switch (choice) {
             default:
-                System.out.println("Invalid choice. Defaulting to attack.");
+                System.out.println(Messages.t("Invalid choice. Defaulting to attack."));
             case "1":
-                System.out.print("You chose attack.");
-                int damage = calculateDamage(player.getAttack(), enemy.getDefence());
-                System.out.println(" You dealt " + damage + " damage to " + enemy.getName());
-                enemy.takeDamage(damage);
+                System.out.println(Messages.tf("You chose attack. You dealt {0} damage to {1}.",
+                        calculateDamage(player.getAttack(), enemy.getDefence()), enemy.getName()));
+                enemy.takeDamage(calculateDamage(player.getAttack(), enemy.getDefence()));
                 break;
             case "2":
-                System.out.print("You chose super attack.");
-                if(player.getHp() <= 10) System.out.println(" Your HP is 10 or below; you cannot use this.");
+                System.out.print(Messages.t("You chose super attack."));
+                if(player.getHp() <= 10) System.out.println(Messages.t(" Your HP is 10 or below; you cannot use this."));
                 else
                 {
-                    System.out.println(" You lost 10 HP.");
+                    System.out.println(Messages.t(" You lost 10 HP."));
                     player.takeDamage(10);
                     int damage1 = calculateDamage((int)(player.getAttack() * 1.8), enemy.getDefence());
                     enemy.takeDamage(damage1);
-                    System.out.println("You dealt " + damage1 + " damage to " + enemy.getName());
+                    System.out.println(Messages.tf("You dealt {0} damage to {1}.", damage1, enemy.getName()));
 
                 }
                 break;
             case "3":
-                System.out.println("You chose heal.");
-                if(player.getHp() <= 10) System.out.println(" Your HP is 10 or below; you cannot use this.");
+                System.out.println(Messages.t("You chose heal."));
+                if(player.getHp() <= 10) System.out.println(Messages.t(" Your HP is 10 or below; you cannot use this."));
                 else
                 {
                     Random r = new Random();
                     int heal = r.nextInt(11);
-                    System.out.println("You recovered " + heal + " HP.");
+                    System.out.println(Messages.tf(" You recovered {0} HP.", heal));
                     player.heal(heal);
                     break;
                 }
@@ -277,7 +277,7 @@ public class FightingGame {
     // 敌人回合
     public void enemyTurn(EnemyCharacter enemy,HeroCharacter player)
     {
-        System.out.println("_____" + enemy.getName() + "'s turn_____");
+        System.out.println(Messages.tf("_____ {0}'s turn_____", enemy.getName()));
 
         Random r = new Random();
 
@@ -288,18 +288,18 @@ public class FightingGame {
             action = enemy.getSkill();
         }
 
-        System.out.println(enemy.getName() + " uses " + action);
+        System.out.println(Messages.tf("{0} uses {1}", enemy.getName(), action));
 
         switch (action) {
             case "normal attack":
                 int damage = calculateDamage(enemy.getAttack(), player.getDefence());
-                System.out.println(enemy.getName() + " deals " + damage + " damage to you");
+                System.out.println(Messages.tf("{0} deals {1} damage to you", enemy.getName(), damage));
                 player.takeDamage(damage);
                 break;
             
             case "super attack":
                 int damage1 = calculateDamage((int)(enemy.getAttack() * 1.5), player.getDefence());
-                System.out.println(enemy.getName() + " deals " + damage1 + " damage to you");
+                System.out.println(Messages.tf("{0} deals {1} damage to you", enemy.getName(), damage1));
                 player.takeDamage(damage1);
                 break;
             
@@ -307,19 +307,19 @@ public class FightingGame {
                 int damage2 = 0;
                 for(int i = 0;i < 2;i++)
                     damage2 += calculateDamage((int)(enemy.getAttack() * 0.75), player.getDefence());
-                System.out.println(enemy.getName() + " deals " + damage2 + " damage to you");
+                System.out.println(Messages.tf("{0} deals {1} damage to you", enemy.getName(), damage2));
                 player.takeDamage(damage2);
                 break;
 
             case "defending":
                 enemy.setDefending(true);
-                System.out.println(enemy.getName() + " reduces incoming damage by 50% for one turn.");
+                System.out.println(Messages.tf("{0} reduces incoming damage by 50% for one turn.", enemy.getName()));
  
                 break;
             
             case "fire":
                 int damage3 = calculateDamage((int)(enemy.getAttack() * 1.8), player.getDefence());
-                System.out.println(enemy.getName() + " deals " + damage3 + " damage to you");
+                System.out.println(Messages.tf("{0} deals {1} damage to you", enemy.getName(), damage3));
                 player.takeDamage(damage3);
                 break;
 
