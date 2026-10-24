@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -87,8 +87,8 @@
   <div class="topbar">
     <div class="brand"><span class="logo">⚔</span><span data-en="Fighting Game" data-zh="战斗游戏">Fighting Game</span></div>
     <div class="lang-switch">
-      <button id="gEn" class="active" onclick="setLang('en')">EN</button>
-      <button id="gZh" onclick="setLang('zh')">中文</button>
+      <button id="gEn" onclick="setLang('en')">EN</button>
+      <button id="gZh" class="active" onclick="setLang('zh')">中文</button>
     </div>
   </div>
 
@@ -333,7 +333,7 @@ const I18N = {
     skillSep:"、"
   }
 };
-let LANG="en";
+let LANG="zh";
 function t(key,...args){
   let s=(I18N[LANG]&&I18N[LANG][key]!=null)?I18N[LANG][key]:(I18N.en[key]!=null?I18N.en[key]:key);
   (args||[]).forEach((a,i)=>{ s=String(s).replace("{"+i+"}",a); });
@@ -622,7 +622,7 @@ function gameOver(){ showScreen("over"); $("overStat").textContent=t("defeated",
 function doExit(){ alert((LANG==="zh")?"感谢游玩！":"Thanks for playing!"); showScreen("home"); }
 
 /* ============ boot ============ */
-setLang("en");
+setLang("zh");
 showScreen("home");
 </script>
 </body>
