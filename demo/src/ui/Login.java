@@ -9,13 +9,19 @@ import i18n.Messages;
 
 public class Login {
     public void start(ArrayList<User> users){
+        Scanner sc = new Scanner(System.in);
+
+        // language selection (chosen once, at startup)
+        System.out.println("Language / 语言: 1. English   2. 中文");
+        String lc = sc.next();
+        if ("2".equals(lc)) Messages.setLang("zh");
+        else Messages.setLang("en");
+
         // create an user database
 
         System.out.println("________________________________");
         System.out.println("___" + Messages.t("Welcome to the login page!") + "___");
         System.out.println("________________________________");
-
-        Scanner sc = new Scanner(System.in);
 
         while (true) {
             System.out.println(Messages.t("Choose an option: 1. Login   2. Register   3. Play as guest   4. Exit"));
@@ -36,10 +42,9 @@ public class Login {
                 case "3":
                     System.out.println(Messages.t("Playing as guest"));
                     FightingGame fg = new FightingGame();
-                    fg.gameStart("user");
+                    fg.gameStart("user", sc);
                 default:
                     System.out.println(Messages.t("Invalid input. Please try again."));
-                    start(users);
 
             }
         }
@@ -97,7 +102,7 @@ public class Login {
             else {
                 System.out.println(Messages.t("Login successful! The game will start shortly."));
                 FightingGame fg = new FightingGame();
-                fg.gameStart(u.getAccount());
+                fg.gameStart(u.getAccount(), sc);
                 break;
             }
         }
