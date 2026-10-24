@@ -1,5 +1,7 @@
 package domain;
 
+import i18n.Messages;
+
 public class Character {
     String name;
     int hp;
@@ -40,7 +42,10 @@ public class Character {
     // 展示属性
     public String show()
     {
-        return "name: " + name+" hp: " + hp+" attack: "+attack+" defence: "+defence;
+        return Messages.t("name: ") + name 
+             + Messages.t(" hp: ") + hp 
+             + Messages.t(" attack: ") + attack 
+             + Messages.t(" defence: ") + defence;
 
     }
     public String getName() {
