@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Java 文字战斗游戏 · Console Fighting Game</title>
+<style>
+  :root {
+    --bg: #0e1116;
+    --bg-soft: #161b22;
+    --bg-card: #1c2230;
+    --border: #2b3340;
+    --text: #e6edf3;
+    --muted: #9aa7b4;
+    --accent: #ff5a3c;
+    --accent-soft: #ff7a5c;
+    --accent2: #4dd0e1;
+    --green: #3fb950;
+    --radius: 14px;
+    --maxw: 1080px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: radial-gradient(1200px 600px at 70% -10%, #1b2333 0%, var(--bg) 55%) fixed;
+    color: var(--text);
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-soft); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 20px; }
+
+  /* Header */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(10px);
+    background: rgba(14,17,22,0.72);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 62px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: .3px; }
+  .brand .logo {
+    width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center;
+    background: linear-gradient(135deg, var(--accent), var(--accent-soft)); color: #fff; font-size: 17px;
+    box-shadow: 0 4px 14px rgba(255,90,60,.4);
+  }
+  .lang-switch { display: flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .lang-switch button {
+    background: transparent; color: var(--muted); border: none; padding: 6px 14px; cursor: pointer;
+    font-size: 13px; font-weight: 600; transition: .2s;
+  }
+  .lang-switch button.active { background: var(--accent); color: #fff; }
+
+  /* Hero */
+  .hero { padding: 78px 0 46px; text-align: center; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--accent-soft);
+    border: 1px solid var(--border); border-radius: 999px; padding: 5px 14px; margin-bottom: 22px;
+    background: var(--bg-soft);
+  }
+  .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
+  .hero h1 {
+    font-size: clamp(34px, 6vw, 60px); line-height: 1.1; margin-bottom: 18px; font-weight: 800;
+    background: linear-gradient(120deg, #fff 10%, var(--accent-soft) 60%, var(--accent2) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p.sub { color: var(--muted); font-size: clamp(15px, 2vw, 19px); max-width: 680px; margin: 0 auto 30px; }
+  .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 10px;
+    font-weight: 700; font-size: 15px; transition: .2s; border: 1px solid transparent; cursor: pointer;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-soft)); color: #fff; box-shadow: 0 8px 24px rgba(255,90,60,.35); }
+  .btn-primary:hover { transform: translateY(-2px); text-decoration: none; }
+  .btn-ghost { background: var(--bg-card); color: var(--text); border-color: var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); text-decoration: none; }
+
+  /* Sections */
+  section { padding: 54px 0; border-top: 1px solid var(--border); }
+  .sec-head { text-align: center; margin-bottom: 38px; }
+  .sec-head h2 { font-size: clamp(24px, 4vw, 34px); margin-bottom: 10px; }
+  .sec-head p { color: var(--muted); }
+
+  /* Feature grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px; transition: .2s; position: relative; overflow: hidden;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .card .ic { font-size: 26px; margin-bottom: 12px; }
+  .card h3 { font-size: 17px; margin-bottom: 8px; }
+  .card p { color: var(--muted); font-size: 14px; }
+
+  /* Code blocks */
+  .code {
+    background: #0b0e13; border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px;
+    font-family: "JetBrains Mono", Consolas, "Courier New", monospace; font-size: 14px; color: #c9d4e0;
+    overflow-x: auto; line-height: 1.7;
+  }
+  .code .c { color: #6b7785; }      /* comment */
+  .code .k { color: #ff7a5c; }      /* keyword/command */
+  .code .s { color: #7ee787; }      /* string */
+
+  /* Tabs (sample output) */
+  .tabs { display: flex; gap: 8px; margin-bottom: 0; }
+  .tabs button {
+    background: var(--bg-soft); border: 1px solid var(--border); color: var(--muted);
+    padding: 8px 18px; border-radius: 10px 10px 0 0; cursor: pointer; font-weight: 600; font-size: 14px;
+  }
+  .tabs button.active { background: var(--bg-card); color: var(--text); border-bottom-color: var(--bg-card); }
+  .panel { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 0 12px 12px 12px; padding: 20px; }
+  .panel.active { display: block; }
+  .panel pre { font-family: "JetBrains Mono", Consolas, monospace; font-size: 13.5px; color: #c9d4e0; white-space: pre-wrap; line-height: 1.7; }
+
+  /* Tree */
+  .tree { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 22px; font-family: "JetBrains Mono", Consolas, monospace; font-size: 13.5px; color: #c9d4e0; }
+  .tree .dir { color: var(--accent2); }
+  .tree .file { color: #c9d4e0; }
+  .tree .ign { color: #6b7785; }
+
+  /* Two column */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  @media (max-width: 760px){ .two { grid-template-columns: 1fr; } }
+
+  /* Optimization list */
+  .opt { list-style: none; display: grid; gap: 12px; }
+  .opt li { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; padding: 14px 18px; font-size: 14.5px; }
+  .opt li b { color: var(--accent-soft); }
+  .tag { display:inline-block; font-size:12px; padding:2px 9px; border-radius:999px; background:var(--bg-soft); border:1px solid var(--border); color:var(--muted); margin-right:6px; }
+
+  footer { padding: 40px 0; text-align: center; color: var(--muted); font-size: 13.5px; border-top: 1px solid var(--border); }
+  footer a { color: var(--accent-soft); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand"><span class="logo">⚔</span><span data-en="Java Fighting Game" data-zh="Java 文字战斗游戏">Java Fighting Game</span></div>
+    <div class="lang-switch">
+      <button id="btnEn" class="active" onclick="setLang('en')">EN</button>
+      <button id="btnZh" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="wrap hero">
+  <div class="badge"><span class="dot"></span><span data-en="Console · Turn-based · Bilingual" data-zh="控制台 · 回合制 · 双语支持">Console · Turn-based · Bilingual</span></div>
+  <h1 data-en="Java Console Fighting Game" data-zh="Java 控制台文字战斗游戏">Java Console Fighting Game</h1>
+  <p class="sub" data-en="A small but complete turn-based battle game in Java — account system, character building, waves of enemies, and a progression loop. Supports English / 中文 out of the box."
+     data-zh="一个用 Java 写的小巧而完整的回合制战斗游戏——账号系统、角色养成、一波波敌人与成长循环。开箱即支持英文 / 中文双语。">
+     A small but complete turn-based battle game in Java — account system, character building, waves of enemies, and a progression loop. Supports English / 中文 out of the box.
+  </p>
+  <div class="cta">
+    <a class="btn btn-primary" href="https://github.com/wflbb123/java-fighting-game" target="_blank" rel="noopener">★ <span data-en="View on GitHub" data-zh="在 GitHub 查看">View on GitHub</span></a>
+    <a class="btn btn-ghost" href="README.zh.md" data-en-readme="README.md" target="_blank"><span data-en="Read the docs" data-zh="阅读文档">Read the docs</span></a>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 data-en="What's inside" data-zh="功能特性">What's inside</h2>
+      <p data-en="Everything you need for a tiny but fun roguelite-ish loop." data-zh="一个迷你但有趣的循环所需的一切。">Everything you need for a tiny but fun roguelite-ish loop.</p>
+    </div>
+    <div class="grid">
+      <div class="card"><div class="ic">🔐</div><h3 data-en="Account system" data-zh="账号系统">Account system</h3><p data-en="Register / login with validation (length, charset), captcha on login, and 3-strike account lockout." data-zh="注册 / 登录带校验（长度、字符集），登录需验证码，输错 3 次锁定账号。">Register / login with validation (length, charset), captcha on login, and 3-strike account lockout.</p></div>
+      <div class="card"><div class="ic">👤</div><h3 data-en="Guest mode" data-zh="游客模式">Guest mode</h3><p data-en="Jump straight into battle without registering. Perfect for a quick test." data-zh="无需注册直接进入战斗，适合快速试玩。">Jump straight into battle without registering. Perfect for a quick test.</p></div>
+      <div class="card"><div class="ic">🎯</div><h3 data-en="Character building" data-zh="角色养成">Character building</h3><p data-en="Allocate 20 skill points across HP / Attack / Defence to shape your hero." data-zh="将 20 点属性分配到 生命 / 攻击 / 防御，打造你的英雄。">Allocate 20 skill points across HP / Attack / Defence to shape your hero.</p></div>
+      <div class="card"><div class="ic">⚔️</div><h3 data-en="Turn-based combat" data-zh="回合制战斗">Turn-based combat</h3><p data-en="Attack, super-attack (costs HP), or heal — fight randomly matched enemies each round." data-zh="攻击、强力攻击（消耗生命值）或治疗——每回合对战随机敌人。">Attack, super-attack (costs HP), or heal — fight randomly matched enemies each round.</p></div>
+      <div class="card"><div class="ic">📈</div><h3 data-en="Progression" data-zh="成长系统">Progression</h3><p data-en="Enemies grow stronger each round; win 3 in a row for an attribute boost." data-zh="敌人每轮变强；连胜 3 场可获得属性提升。">Enemies grow stronger each round; win 3 in a row for an attribute boost.</p></div>
+      <div class="card"><div class="ic">🌐</div><h3 data-en="Bilingual (EN / 中文)" data-zh="双语（英文 / 中文）">Bilingual (EN / 中文)</h3><p data-en="Pick a language at startup; all UI text switches via a tiny i18n helper." data-zh="启动时选择语言；所有界面文本通过极简 i18n 工具切换。">Pick a language at startup; all UI text switches via a tiny i18n helper.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SAMPLE OUTPUT -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 data-en="See it in action" data-zh="看看实际效果">See it in action</h2>
+      <p data-en="Same game, two languages — choose at launch." data-zh="同一款游戏，两种语言——启动时选择。">Same game, two languages — choose at launch.</p>
+    </div>
+    <div class="tabs">
+      <button id="tabEn" class="active" onclick="showPanel('en')">English</button>
+      <button id="tabZh" onclick="showPanel('zh')">中文</button>
+    </div>
+    <div id="panelEn" class="panel active"><pre>Welcome to the login page!
+Choose an option: 1. Login   2. Register   3. Play as guest   4. Exit
+> 3
+Playing as guest
+Welcome, user!!!!
+Create your character:
+Your name is: Hero
+You have 20 points. Please allocate skill points. (You have basic attributes.)
+Allocate your HP: 10
+Allocate your Attack: 5
+Allocate your Defence: 5
+Character created successfully!
+Your original attributes are: name: Hero  hp: 130  attack: 15  defence: 15
+Your enemy is: Slime
+===== Round 1 =====
+Your turn
+Choose your action:
+1. Attack
+2. Super attack (costs 10 HP, deals heavy damage)
+3. Heal
+> 1
+You chose attack. You dealt 12 damage to Slime.
+_____ Slime's turn_____
+Slime uses Tackle. Slime deals 8 damage to you
+You defeated Slime! You win!!!
+Would you like to continue? (y/n) > n
+Game over!
+You have defeated 1 enemies!!!
+Thank you for playing!</pre></div>
+    <div id="panelZh" class="panel"><pre>欢迎来到登录页面！
+请选择：1. 登录   2. 注册   3. 游客游玩   4. 退出
+> 3
+以游客身份游玩
+欢迎，user！！！！
+创建你的角色：
+你的名字是：Hero
+你有 20 点属性点，请分配。（你拥有基础属性。）
+分配你的HP：10
+分配你的Attack：5
+分配你的Defence：5
+角色创建成功！
+你的初始属性是：名称：Hero  生命：130  攻击：15  防御：15
+你的敌人是：史莱姆
+===== 第 1 回合 =====
+你的回合
+请选择行动：
+1. 攻击
+2. 强力攻击（消耗10生命值，造成大量伤害）
+3. 治疗
+> 1
+你选择了攻击。你对 史莱姆 造成了 12 点伤害。
+_____ 史莱姆 的回合 _____
+史莱姆 使用了 猛撞。史莱姆 对你造成了 8 点伤害
+你击败了 史莱姆！你赢了！！！
+是否继续？（y/n）> n
+游戏结束！
+你总共击败了 1 个敌人！！！
+感谢游玩！</pre></div>
+  </div>
+</section>
+
+<!-- BUILD & RUN -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 data-en="Build & run" data-zh="编译与运行">Build & run</h2>
+      <p data-en="Requires JDK 8+. Tested with JDK 25." data-zh="需要 JDK 8 及以上，使用 JDK 25 测试通过。">Requires JDK 8+. Tested with JDK 25.</p>
+    </div>
+    <div class="two">
+      <div>
+        <h3 style="margin-bottom:12px" data-en="1 · Compile" data-zh="1 · 编译">1 · Compile</h3>
+        <div class="code"><span class="c"># from the demo/ directory</span>
+<span class="k">javac</span> -d bin src/App.java src/i18n/*.java src/domain/*.java src/ui/*.java</div>
+        <h3 style="margin:22px 0 12px" data-en="2 · Run" data-zh="2 · 运行">2 · Run</h3>
+        <div class="code"><span class="k">java</span> -cp bin App</div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:12px" data-en="What happens" data-zh="运行后会怎样">What happens</h3>
+        <div class="code"><span class="s">$ java -cp bin App</span>
+<span class="c">// you'll be asked to pick a language first</span>
+Choose language / 选择语言: 1. English  2. 中文
+<span class="c">// then the login menu appears...</span>
+Welcome to the login page!
+Choose an option: 1. Login  2. Register  3. Play as guest  4. Exit</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STRUCTURE -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 data-en="Project structure" data-zh="项目结构">Project structure</h2>
+      <p data-en="Clean separation: entry point, domain model, UI, and i18n." data-zh="清晰的职责划分：入口、领域模型、界面与国际化。">Clean separation: entry point, domain model, UI, and i18n.</p>
+    </div>
+    <div class="tree">
+<span class="dir">demo/</span>
+├── <span class="dir">src/</span>
+│   ├── <span class="file">App.java</span>              <span style="color:#6b7785"># 入口（含语言选择）</span>
+│   ├── <span class="dir">i18n/</span>
+│   │   └── <span class="file">Messages.java</span>      <span style="color:#6b7785"># 双语文本工具（EN / 中文）</span>
+│   ├── <span class="dir">domain/</span>               <span style="color:#6b7785"># 游戏模型</span>
+│   │   ├── <span class="file">Character.java</span>
+│   │   ├── <span class="file">HeroCharacter.java</span>
+│   │   ├── <span class="file">EnemyCharacter.java</span>
+│   │   └── <span class="file">User.java</span>
+│   └── <span class="dir">ui/</span>                   <span style="color:#6b7785"># 登录与战斗主循环</span>
+│       ├── <span class="file">Login.java</span>
+│       └── <span class="file">FightingGame.java</span>
+├── <span class="dir">lib/</span>                      <span style="color:#6b7785"># 依赖（当前为空）</span>
+└── <span class="dir">bin/</span>                      <span class="ign"># 编译产物（已被 .gitignore 忽略）</span>
+<span class="file">index.html</span>                 <span style="color:#6b7785"># 本页面</span>
+<span class="file">README.md</span> / <span class="file">README.zh.md</span>
+<span class="file">OPTIMIZATION.md</span>           <span style="color:#6b7785"># 已知问题与优化建议</span>
+    </div>
+  </div>
+</section>
+
+<!-- OPTIMIZATION -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 data-en="Known issues & ideas" data-zh="已知问题与优化建议">Known issues & ideas</h2>
+      <p data-en="Documented in OPTIMIZATION.md — a few highlights:" data-zh="详见 OPTIMIZATION.md，这里列几个重点：">Documented in OPTIMIZATION.md — a few highlights:</p>
+    </div>
+    <ul class="opt">
+      <li><span class="tag">fixed</span><b data-en="Single Scanner" data-zh="统一 Scanner">Single Scanner</b> — <span data-en="Use one shared Scanner across the flow to avoid NoSuchElementException from buffered input." data-zh="全程复用同一个 Scanner，避免缓冲输入导致的 NoSuchElementException。">Use one shared Scanner across the flow to avoid NoSuchElementException from buffered input.</span></li>
+      <li><span class="tag">fixed</span><b data-en="show() output" data-zh="show() 输出">show() output</b> — <span data-en="Attribute display after a win streak is now printed correctly." data-zh="连胜后的属性显示现在能正确打印了。">Attribute display after a win streak is now printed correctly.</span></li>
+      <li><span class="tag">idea</span><b data-en="Persistence" data-zh="数据持久化">Persistence</b> — <span data-en="Accounts and progress are in-memory only; add file/DB storage." data-zh="账号与进度仅存于内存，建议加入文件/数据库存储。">Accounts and progress are in-memory only; add file/DB storage.</span></li>
+      <li><span class="tag">idea</span><b data-en="Input safety" data-zh="输入安全">Input safety</b> — <span data-en="nextInt() crashes on non-numeric input; add validation loops." data-zh="nextInt() 遇到非数字会崩溃，建议增加校验循环。">nextInt() crashes on non-numeric input; add validation loops.</span></li>
+      <li><span class="tag">idea</span><b data-en="Captcha" data-zh="验证码">Captcha</b> — <span data-en="The verification code is printed in plaintext; generate &amp; check it properly." data-zh="验证码以明文打印，建议真正生成并校验。">The verification code is printed in plaintext; generate &amp; check it properly.</span></li>
+      <li><span class="tag">idea</span><b data-en="LICENSE" data-zh="开源协议">LICENSE</b> — <span data-en="Add a LICENSE file to make the repo clearly open-source." data-zh="添加 LICENSE 文件，让仓库的开源属性更明确。">Add a LICENSE file to make the repo clearly open-source.</span></li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <p data-en="Built as a learning project · Java console game with bilingual UI."
+     data-zh="作为学习项目构建 · 带双语界面的 Java 控制台游戏。">
+     Built as a learning project · Java console game with bilingual UI.</p>
+  <p style="margin-top:6px">⭐ <a href="https://github.com/wflbb123/java-fighting-game" target="_blank" rel="noopener">github.com/wflbb123/java-fighting-game</a></p>
+</footer>
+
+<script>
+  function setLang(lang){
+    document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+    document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+    document.getElementById('btnZh').classList.toggle('active', lang === 'zh');
+    document.querySelectorAll('[data-en]').forEach(function(el){
+      // don't override the docs link target here
+      el.textContent = (lang === 'zh') ? el.getAttribute('data-zh') : el.getAttribute('data-en');
+    });
+    // swap the docs link file
+    var docs = document.querySelector('a[data-en-readme]');
+    if (docs) docs.setAttribute('href', (lang === 'zh') ? 'README.zh.md' : 'README.md');
+  }
+  function showPanel(which){
+    document.getElementById('tabEn').classList.toggle('active', which === 'en');
+    document.getElementById('tabZh').classList.toggle('active', which === 'zh');
+    document.getElementById('panelEn').classList.toggle('active', which === 'en');
+    document.getElementById('panelZh').classList.toggle('active', which === 'zh');
+  }
+</script>
+</body>
+</html>
