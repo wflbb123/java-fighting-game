@@ -7,6 +7,7 @@ enemies, spend skill points, and grow stronger as you win.
 > **Bilingual:** the game supports **English / 中文** — pick a language at startup.
 > 中文说明见 [`README.zh.md`](README.zh.md).
 > A visual project page is available at [`index.html`](index.html).
+> A fully playable web version lives at [`game.html`](game.html) — open it in any browser to play the whole game.
 
 ## Features
 
