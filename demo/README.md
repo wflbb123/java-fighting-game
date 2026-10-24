@@ -4,6 +4,9 @@ A simple turn-based console fighting game written in Java. It features an accoun
 system (login / register / guest play) and a battle loop where you fight waves of
 enemies, spend skill points, and grow stronger as you win.
 
+> **Bilingual:** the game supports **English / 中文** — pick a language at startup.
+> 中文说明见 [`README.zh.md`](README.zh.md).
+
 ## Features
 
 - **Account system** — register a new account or log in with an existing one.
