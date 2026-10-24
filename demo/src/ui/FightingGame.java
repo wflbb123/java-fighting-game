@@ -9,13 +9,13 @@ import domain.HeroCharacter;
 import i18n.Messages;
 
 public class FightingGame {
-    public void gameStart(String username)
+    public void gameStart(String username, Scanner sc)
     {
         System.err.println("---------------------------");
         System.err.println("-- " + Messages.tf("Welcome, {0}!!!!", username) + " --");
         System.err.println("---------------------------");
 
-        HeroCharacter player = creatPlayerCharacter(username);
+        HeroCharacter player = creatPlayerCharacter(username, sc);
         System.out.println(Messages.t("Character created successfully!"));
         System.out.println(Messages.tf("Your original attributes are: {0}", player.show()));
         System.out.println(Messages.tf("Your original skills are: {0}", player.showskill()));
@@ -67,7 +67,7 @@ public class FightingGame {
                 System.out.println(getHealthBar(enemy.getName(),enemy.getHp(),enemy.getMax_Hp()));
 
                 // 玩家回合
-                playerTurn(player,enemy);
+                playerTurn(player,enemy,sc);
 
                 if(!enemy.isAlive())
                 {
@@ -114,8 +114,6 @@ public class FightingGame {
             if(player.isAlive())
             {
                 System.out.println(Messages.t("Would you like to continue? (y/n)"));
-                Scanner sc = new Scanner(System.in);
-
                 String s = sc.next();
 
                 if(s.equalsIgnoreCase("y") ||s.equalsIgnoreCase("yes") )
@@ -148,11 +146,9 @@ public class FightingGame {
     }
 
     // 创建玩家
-    public HeroCharacter creatPlayerCharacter(String username)
+    public HeroCharacter creatPlayerCharacter(String username, Scanner sc)
 
     {
-        Scanner sc = new Scanner(System.in);
-
         System.err.println(Messages.t("Create your character: "));
         System.err.println(Messages.tf("Your name is: {0}", username));
 
@@ -231,12 +227,11 @@ public class FightingGame {
     }
 
     // 玩家回合
-    public void playerTurn(HeroCharacter player,EnemyCharacter enemy)
+    public void playerTurn(HeroCharacter player,EnemyCharacter enemy, Scanner sc)
     {
         System.out.println(Messages.t("Your turn"));
         System.out.println(Messages.t("Choose your action:\n1. Attack\n2. Super attack (costs 10 HP, deals heavy damage)\n3. Heal\n"));
 
-        Scanner sc = new Scanner(System.in);
         String choice = sc.next();
         switch (choice) {
             default:
