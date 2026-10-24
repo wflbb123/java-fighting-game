@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Java Fighting Game · Playable Web Version</title>
+<style>
+  :root{
+    --bg:#0e1116; --bg-soft:#161b22; --bg-card:#1c2230; --border:#2b3340;
+    --text:#e6edf3; --muted:#9aa7b4; --accent:#ff5a3c; --accent-soft:#ff7a5c;
+    --accent2:#4dd0e1; --green:#3fb950; --yellow:#d8a657; --red:#ff5d5d;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:radial-gradient(1200px 600px at 70% -10%,#1b2333 0%,var(--bg) 55%) fixed;
+    color:var(--text);font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 18px 60px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
+  .brand .logo{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--accent),var(--accent-soft));color:#fff;box-shadow:0 4px 14px rgba(255,90,60,.4)}
+  .lang-switch{display:flex;border:1px solid var(--border);border-radius:999px;overflow:hidden}
+  .lang-switch button{background:transparent;color:var(--muted);border:none;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600}
+  .lang-switch button.active{background:var(--accent);color:#fff}
+  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:26px;margin-bottom:18px}
+  .screen{display:none;animation:fade .25s ease}
+  .screen.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  h1.title{font-size:clamp(28px,5vw,44px);text-align:center;line-height:1.15;margin-bottom:8px;
+    background:linear-gradient(120deg,#fff 10%,var(--accent-soft) 60%,var(--accent2) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+  .sub{text-align:center;color:var(--muted);margin-bottom:26px}
+  h2{font-size:22px;margin-bottom:16px}
+  label{display:block;font-size:13px;color:var(--muted);margin:14px 0 6px}
+  input[type=text],input[type=password],input[type=number]{
+    width:100%;padding:11px 13px;border-radius:9px;border:1px solid var(--border);
+    background:var(--bg-soft);color:var(--text);font-size:15px;outline:none}
+  input:focus{border-color:var(--accent)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:10px;
+    font-weight:700;font-size:15px;border:1px solid transparent;cursor:pointer;transition:.15s;width:100%;margin-top:10px}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-soft));color:#fff;box-shadow:0 8px 24px rgba(255,90,60,.3)}
+  .btn-primary:hover{transform:translateY(-2px)}
+  .btn-ghost{background:var(--bg-soft);color:var(--text);border-color:var(--border)}
+  .btn-ghost:hover{border-color:var(--accent)}
+  .menu{display:grid;gap:12px}
+  .msg{font-size:14px;margin-top:12px;min-height:20px}
+  .msg.err{color:var(--red)} .msg.ok{color:var(--green)} .msg.warn{color:var(--yellow)}
+  .captcha-box{display:flex;align-items:center;gap:12px;background:var(--bg-soft);border:1px dashed var(--accent2);
+    border-radius:9px;padding:10px 14px;font-family:monospace;font-size:22px;letter-spacing:4px;color:var(--accent2);font-weight:700}
+  .row{display:flex;gap:12px;align-items:center}
+  .remaining{font-weight:700;color:var(--accent2)}
+  .alloc{display:grid;gap:14px}
+  .alloc .item{background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+  .alloc .item .top{display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px}
+  .alloc .item .val{font-weight:700;color:var(--accent-soft)}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .stat-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+  .stat-preview .s{background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+  .stat-preview .s .k{font-size:12px;color:var(--muted)} .stat-preview .s .v{font-size:20px;font-weight:800;color:var(--accent-soft)}
+  /* Battle */
+  .enemy-name{text-align:center;font-size:20px;font-weight:800;margin-bottom:4px}
+  .round-tag{text-align:center;color:var(--muted);font-size:13px;margin-bottom:14px}
+  .bar{margin:10px 0}
+  .bar .label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+  .bar .track{height:18px;background:var(--bg-soft);border:1px solid var(--border);border-radius:999px;overflow:hidden}
+  .bar .fill{height:100%;background:linear-gradient(90deg,var(--green),#2ea043);transition:width .35s ease}
+  .bar.enemy .fill{background:linear-gradient(90deg,var(--red),#c9302c)}
+  .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+  .actions .btn{margin-top:0;font-size:14px;padding:14px 8px}
+  .actions .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+  .log{margin-top:16px;background:#0b0e13;border:1px solid var(--border);border-radius:10px;padding:14px;
+    height:190px;overflow-y:auto;font-size:13.5px;line-height:1.7;font-family:"JetBrains Mono",Consolas,monospace}
+  .log p{margin:0 0 4px;white-space:pre-wrap}
+  .log .me{color:var(--accent-soft)} .log .foe{color:var(--red)} .log .sys{color:var(--accent2)} .log .win{color:var(--green);font-weight:700}
+  .continue-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .center{text-align:center}
+  .big{font-size:34px;text-align:center;margin:10px 0}
+  .muted{color:var(--muted)}
+  a{color:var(--accent-soft)}
+  .back{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;margin-top:10px;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand"><span class="logo">⚔</span><span data-en="Fighting Game" data-zh="战斗游戏">Fighting Game</span></div>
+    <div class="lang-switch">
+      <button id="gEn" class="active" onclick="setLang('en')">EN</button>
+      <button id="gZh" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <section id="screen-home" class="screen active">
+    <h1 class="title" data-en="Java Fighting Game" data-zh="Java 文字战斗游戏">Java Fighting Game</h1>
+    <p class="sub" data-en="A turn-based console game — now playable right here in your browser."
+       data-zh="一个回合制控制台游戏——现在可以直接在浏览器里玩。">A turn-based console game — now playable right here in your browser.</p>
+    <div class="card">
+      <div class="menu">
+        <button class="btn btn-primary" onclick="goLogin()">🔐 <span data-en="Login" data-zh="登录">Login</span></button>
+        <button class="btn btn-ghost" onclick="goRegister()">📝 <span data-en="Register" data-zh="注册">Register</span></button>
+        <button class="btn btn-ghost" onclick="goGuest()">👤 <span data-en="Play as guest" data-zh="游客游玩">Play as guest</span></button>
+        <button class="btn btn-ghost" onclick="doExit()">🚪 <span data-en="Exit" data-zh="退出">Exit</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOGIN -->
+  <section id="screen-login" class="screen">
+    <div class="card">
+      <h2 data-en="Login" data-zh="登录">Login</h2>
+      <div id="login-step-account">
+        <label data-en="Account" data-zh="账号">Account</label>
+        <input type="text" id="loginAccount" autocomplete="off" placeholder="3-16 chars, letters & numbers" />
+        <button class="btn btn-primary" onclick="loginSubmitAccount()" data-en="Next" data-zh="下一步">Next</button>
+        <div class="msg" id="loginMsg"></div>
+      </div>
+      <div id="login-step-pass" style="display:none">
+        <label data-en="Password" data-zh="密码">Password</label>
+        <input type="password" id="loginPass" autocomplete="off" />
+        <label data-en="Verification code" data-zh="验证码">Verification code</label>
+        <div class="row">
+          <div class="captcha-box" id="loginCaptcha">----</div>
+          <button class="btn btn-ghost" style="width:auto;margin-top:0" onclick="refreshCaptcha()" data-en="↻ New" data-zh="↻ 换一个">↻ New</button>
+        </div>
+        <input type="text" id="loginCode" autocomplete="off" style="margin-top:10px" placeholder="case-insensitive" />
+        <button class="btn btn-primary" onclick="loginSubmitPass()" data-en="Login" data-zh="登录">Login</button>
+        <div class="msg" id="loginMsg2"></div>
+      </div>
+      <button class="back" onclick="showScreen('home')" data-en="← Back" data-zh="← 返回">← Back</button>
+    </div>
+  </section>
+
+  <!-- REGISTER -->
+  <section id="screen-register" class="screen">
+    <div class="card">
+      <h2 data-en="Register" data-zh="注册">Register</h2>
+      <label data-en="Account" data-zh="账号">Account</label>
+      <input type="text" id="regAccount" autocomplete="off" placeholder="3-16 chars, letters & numbers" />
+      <label data-en="Password" data-zh="密码">Password</label>
+      <input type="password" id="regPass" autocomplete="off" placeholder="6-20 chars, letters & numbers" />
+      <label data-en="Confirm password" data-zh="确认密码">Confirm password</label>
+      <input type="password" id="regPass2" autocomplete="off" />
+      <button class="btn btn-primary" onclick="regSubmit()" data-en="Create account" data-zh="创建账号">Create account</button>
+      <div class="msg" id="regMsg"></div>
+      <button class="back" onclick="showScreen('home')" data-en="← Back" data-zh="← 返回">← Back</button>
+    </div>
+  </section>
+
+  <!-- CHARACTER -->
+  <section id="screen-char" class="screen">
+    <div class="card">
+      <h2 data-en="Create your character" data-zh="创建你的角色">Create your character</h2>
+      <p class="muted" id="charNameLine"></p>
+      <p class="muted" data-en="You have 20 points. Allocate them across your attributes."
+         data-zh="你有 20 点属性点，请分配到各项属性。">You have 20 points. Allocate them across your attributes.</p>
+      <div class="alloc">
+        <div class="item">
+          <div class="top"><span data-en="HP (×10)" data-zh="生命（×10）">HP (×10)</span><span class="val" id="valHp">0</span></div>
+          <input type="range" min="0" max="20" value="0" id="allocHp" oninput="allocChanged()" />
+        </div>
+        <div class="item">
+          <div class="top"><span data-en="Attack (×2)" data-zh="攻击（×2）">Attack (×2)</span><span class="val" id="valAtk">0</span></div>
+          <input type="range" min="0" max="20" value="0" id="allocAtk" oninput="allocChanged()" />
+        </div>
+        <div class="item">
+          <div class="top"><span data-en="Defence" data-zh="防御">Defence</span><span class="val" id="valDef">0</span></div>
+          <input type="range" min="0" max="20" value="0" id="allocDef" oninput="allocChanged()" />
+        </div>
+      </div>
+      <p data-en="Points remaining: " data-zh="剩余点数："><span class="remaining" id="pointsLeft">20</span></p>
+      <div class="stat-preview">
+        <div class="s"><div class="k" data-en="HP" data-zh="生命">HP</div><div class="v" id="prevHp">100</div></div>
+        <div class="s"><div class="k" data-en="ATK" data-zh="攻击">ATK</div><div class="v" id="prevAtk">10</div></div>
+        <div class="s"><div class="k" data-en="DEF" data-zh="防御">DEF</div><div class="v" id="prevDef">0</div></div>
+      </div>
+      <button class="btn btn-primary" id="startBattleBtn" onclick="startCharacter()" data-en="Start battle" data-zh="开始战斗">Start battle</button>
+    </div>
+  </section>
+
+  <!-- BATTLE -->
+  <section id="screen-battle" class="screen">
+    <div class="card">
+      <div class="enemy-name" id="enemyName">Enemy</div>
+      <div class="round-tag" id="roundTag"></div>
+      <div class="bar"><div class="label"><span id="pHpLabel">You</span><span id="pHpText"></span></div><div class="track"><div class="fill" id="pHpFill" style="width:100%"></div></div></div>
+      <div class="bar enemy"><div class="label"><span id="eHpLabel">Enemy</span><span id="eHpText"></span></div><div class="track"><div class="fill" id="eHpFill" style="width:100%"></div></div></div>
+      <div class="actions">
+        <button class="btn btn-primary" id="actAtk" onclick="playerAction('attack')" data-en="1. Attack" data-zh="1. 攻击">1. Attack</button>
+        <button class="btn btn-ghost" id="actSuper" onclick="playerAction('super')" data-en="2. Super (−10 HP)" data-zh="2. 强力攻击（−10血）">2. Super (−10 HP)</button>
+        <button class="btn btn-ghost" id="actHeal" onclick="playerAction('heal')" data-en="3. Heal" data-zh="3. 治疗">3. Heal</button>
+      </div>
+      <div class="log" id="battleLog"></div>
+      <div class="continue-btns" id="continueBox" style="display:none">
+        <button class="btn btn-primary" onclick="continueBattle()" data-en="Continue ▶" data-zh="继续 ▶">Continue ▶</button>
+        <button class="btn btn-ghost" onclick="quitGame()" data-en="Quit" data-zh="退出">Quit</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- GAME OVER -->
+  <section id="screen-over" class="screen">
+    <div class="card center">
+      <h2 data-en="Game over!" data-zh="游戏结束！">Game over!</h2>
+      <div class="big" id="overStat"></div>
+      <p class="muted" data-en="Thank you for playing!" data-zh="感谢游玩！">Thank you for playing!</p>
+      <button class="btn btn-primary" onclick="showScreen('home')" data-en="Back to menu" data-zh="返回主菜单">Back to menu</button>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============ i18n ============ */
+const I18N = {
+  en:{
+    welcome:"Welcome to the login page!",
+    loginTitle:"Login", regTitle:"Register", guestTitle:"Play as guest",
+    accNotExist:"Account does not exist. Please type again.",
+    accLocked:"Your account has been locked. Please contact your administrator or log in with another account.",
+    accFound:"Account found. Please enter your password.",
+    wrongPass:"Incorrect password. Please try again.",
+    lockedMsg:"You have entered the wrong password 3 times. Your account is now locked. Please contact your administrator.",
+    loginOk:"Login successful! The game will start shortly.",
+    accExists:"Account already exists. Please choose a different account.",
+    accAvail:"Account available. Please enter your password.",
+    regOk:"Registration successful. Please log in.",
+    confirmMismatch:"Passwords do not match. Please try again.",
+    typeCode:"Please type the verification code (case-insensitive):",
+    codeCorrect:"Correct!", codeWrong:"Incorrect! Please try again.",
+    createChar:"Create your character:",
+    nameIs:"Your name is: {0}",
+    pointsHint:"You have 20 points. Please allocate skill points. (You have basic attributes.)",
+    charOk:"Character created successfully!",
+    origAttr:"Your original attributes are: {0}",
+    origSkill:"Your original skills are: {0}",
+    enemyIs:"Your enemy is: {0}",
+    gameStart:"Game Start",
+    count:"Battle {0}", round:"Round {0}",
+    yourTurn:"Your turn",
+    chooseAction:"Choose your action: 1. Attack  2. Super attack (costs 10 HP)  3. Heal",
+    invalidChoice:"Invalid choice. Defaulting to attack.",
+    atkUse:"You chose attack. You dealt {0} damage to {1}.",
+    superUse:"You chose super attack.",
+    superLow:" Your HP is 10 or below; you cannot use this.",
+    superLost:" You lost 10 HP.",
+    superDealt:"You dealt {0} damage to {1}.",
+    healUse:"You chose heal.",
+    healLow:" Your HP is 10 or below; you cannot use this.",
+    healRec:" You recovered {0} HP.",
+    foeTurn:"_____ {0}'s turn_____",
+    foeUses:"{0} uses {1}",
+    foeDeal:"{0} deals {1} damage to you",
+    foeDef:"{0} reduces incoming damage by 50% for one turn.",
+    youWin:"You defeated {0}! You win!!!",
+    youLose:"You lost!!!",
+    recovered:"You recovered {0} HP",
+    threeWin:"You have won 3 times! You will receive an attribute boost.",
+    boost:"+30 HP, +5 attack, +3 defence",
+    yourAttr:"Your attributes: {0}",
+    contQ:"Would you like to continue? (y/n)",
+    cont:"Continue", quit:"Quit",
+    invalidCont:"Invalid input. Continuing by default.",
+    exitMsg:"Exit",
+    gameOver:"Game over!",
+    defeated:"You have defeated {0} enemies!!!",
+    thanks:"Thank you for playing!",
+    skills:["normal attack","super attack","heal"],
+    enemySkills:{"super attack":"super attack","rapid attack":"rapid attack","defending":"defending","fire":"fire"},
+    enemies:[{name:"Slime",skill:"super attack"},{name:"Goblin",skill:"rapid attack"},{name:"Golem",skill:"defending"},{name:"Dragon",skill:"fire"}],
+    hp:"HP", atk:"Attack", def:"Defence", you:"You",
+    attrFmt:"name: {0}  hp: {1}  attack: {2}  defence: {3}",
+    skillSep:", "
+  },
+  zh:{
+    welcome:"欢迎来到登录页面！",
+    loginTitle:"登录", regTitle:"注册", guestTitle:"游客游玩",
+    accNotExist:"账号不存在，请重新输入。",
+    accLocked:"你的账号已被锁定，请联系管理员或换一个账号登录。",
+    accFound:"账号已找到，请输入密码。",
+    wrongPass:"密码错误，请重试。",
+    lockedMsg:"密码连续输错 3 次，账号已被锁定，请联系管理员。",
+    loginOk:"登录成功！游戏即将开始。",
+    accExists:"账号已存在，请更换账号。",
+    accAvail:"账号可用，请输入密码。",
+    regOk:"注册成功，请登录。",
+    confirmMismatch:"两次密码不一致，请重试。",
+    typeCode:"请输入验证码（不区分大小写）：",
+    codeCorrect:"正确！", codeWrong:"错误！请重试。",
+    createChar:"创建你的角色：",
+    nameIs:"你的名字是：{0}",
+    pointsHint:"你有 20 点属性点，请分配。（你拥有基础属性。）",
+    charOk:"角色创建成功！",
+    origAttr:"你的初始属性是：{0}",
+    origSkill:"你的初始技能是：{0}",
+    enemyIs:"你的敌人是：{0}",
+    gameStart:"游戏开始",
+    count:"第 {0} 场", round:"第 {0} 回合",
+    yourTurn:"你的回合",
+    chooseAction:"请选择行动：1. 攻击  2. 强力攻击（消耗10生命值）  3. 治疗",
+    invalidChoice:"选择无效，默认使用攻击。",
+    atkUse:"你选择了攻击。你对 {1} 造成了 {0} 点伤害。",
+    superUse:"你选择了强力攻击。",
+    superLow:" 你的生命值不高于 10，无法使用。",
+    superLost:" 你失去了 10 点生命值。",
+    superDealt:"你对 {1} 造成了 {0} 点伤害。",
+    healUse:"你选择了治疗。",
+    healLow:" 你的生命值不高于 10，无法使用。",
+    healRec:" 你恢复了 {0} 点生命值。",
+    foeTurn:"_____ {0} 的回合 _____",
+    foeUses:"{0} 使用了 {1}",
+    foeDeal:"{0} 对你造成了 {1} 点伤害",
+    foeDef:"{0} 本回合伤害减免 50%。",
+    youWin:"你击败了 {0}！你赢了！！！",
+    youLose:"你输了！！！",
+    recovered:"你恢复了 {0} 点生命值",
+    threeWin:"你已连胜 3 场！将获得属性提升。",
+    boost:"+30 生命值，+5 攻击，+3 防御",
+    yourAttr:"你的属性：{0}",
+    contQ:"是否继续？（y/n）",
+    cont:"继续", quit:"退出",
+    invalidCont:"输入无效，默认继续。",
+    exitMsg:"退出",
+    gameOver:"游戏结束！",
+    defeated:"你总共击败了 {0} 个敌人！！！",
+    thanks:"感谢游玩！",
+    skills:["普通攻击","强力攻击","治疗"],
+    enemySkills:{"super attack":"强力攻击","rapid attack":"连击","defending":"防御","fire":"火焰"},
+    enemies:[{name:"史莱姆",skill:"super attack"},{name:"哥布林",skill:"rapid attack"},{name:"石巨人",skill:"defending"},{name:"巨龙",skill:"fire"}],
+    hp:"生命", atk:"攻击", def:"防御", you:"你",
+    attrFmt:"名称：{0}  生命：{1}  攻击：{2}  防御：{3}",
+    skillSep:"、"
+  }
+};
+let LANG="en";
+function t(key,...args){
+  let s=(I18N[LANG]&&I18N[LANG][key]!=null)?I18N[LANG][key]:(I18N.en[key]!=null?I18N.en[key]:key);
+  (args||[]).forEach((a,i)=>{ s=String(s).replace("{"+i+"}",a); });
+  return s;
+}
+function setLang(l){
+  LANG=l;
+  document.documentElement.lang=(l==="zh")?"zh-CN":"en";
+  document.getElementById("gEn").classList.toggle("active",l==="en");
+  document.getElementById("gZh").classList.toggle("active",l==="zh");
+  document.querySelectorAll("[data-en]").forEach(el=>{ el.textContent=t(el.getAttribute("data-en")); });
+  // refresh any visible dynamic text
+  if(G.player) renderBattle();
+}
+
+/* ============ state ============ */
+const G={ users:[], currentUser:null, player:null, enemy:null, enemies:[],
+  count:1, win:0, round:1, loginFails:0, pendingAccount:null, captcha:"" };
+
+function loadUsers(){
+  try{ const s=localStorage.getItem("ffg_users"); if(s) return JSON.parse(s); }catch(e){}
+  return [];
+}
+function saveUsers(){ try{ localStorage.setItem("ffg_users",JSON.stringify(G.users)); }catch(e){} }
+G.users=loadUsers();
+
+/* ============ screen helpers ============ */
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById("screen-"+id).classList.add("active");
+  if(id==="home"){ document.getElementById("login-step-account").style.display="block";
+    document.getElementById("login-step-pass").style.display="none"; }
+}
+function $(id){ return document.getElementById(id); }
+
+/* ============ validation ============ */
+function validAccount(a){
+  if(a==null) return "null";
+  if(a.length<3||a.length>16) return "len";
+  if(!/^[a-zA-Z0-9]+$/.test(a)) return "chars";
+  if(/^[0-9]+$/.test(a)) return "numonly";
+  return "ok";
+}
+function validPassword(p){
+  if(p==null) return "null";
+  if(p.length<6||p.length>20) return "len";
+  if(!/^[a-zA-Z0-9]+$/.test(p)) return "chars";
+  if(/^[0-9]+$/.test(p)) return "numonly";
+  return "ok";
+}
+function accErrMsg(r){
+  if(r==="null") return t("accNotExist");
+  if(r==="len") return (LANG==="zh")?"账号无效，长度需为 3-16 个字符。":"Invalid account. Please enter a valid account (3-16 characters).";
+  if(r==="chars") return (LANG==="zh")?"账号无效，只能包含字母和数字。":"Invalid account. Please enter a valid account (letters and numbers only).";
+  if(r==="numonly") return (LANG==="zh")?"账号无效，不能全是数字。":"Invalid account. Please enter a valid account (cannot be numbers only).";
+  return "";
+}
+function passErrMsg(r){
+  if(r==="null") return (LANG==="zh")?"密码不能为空，请输入有效密码。":"Password cannot be null. Please enter a valid password.";
+  if(r==="len") return (LANG==="zh")?"密码无效，长度需为 6-20 个字符。":"Invalid password. Please enter a valid password (6-20 characters).";
+  if(r==="chars") return (LANG==="zh")?"密码无效，只能包含字母和数字。":"Invalid password. Please enter a valid password (letters and numbers only).";
+  if(r==="numonly") return (LANG==="zh")?"密码无效，不能全是数字。":"Invalid password. Please enter a valid password (cannot be numbers only).";
+  return "";
+}
+function findUser(acc){ return G.users.find(u=>u.account===acc); }
+
+/* ============ captcha ============ */
+function genCaptcha(){
+  const L=[]; for(let i=0;i<26;i++){ L.push(String.fromCharCode(97+i)); L.push(String.fromCharCode(65+i)); }
+  let arr=[]; for(let i=0;i<4;i++) arr.push(L[Math.floor(Math.random()*52)]);
+  arr.push(String(Math.floor(Math.random()*10)));
+  const i=Math.floor(Math.random()*arr.length); const tmp=arr[4]; arr[4]=arr[i]; arr[i]=tmp;
+  return arr.join("");
+}
+function refreshCaptcha(){ G.captcha=genCaptcha(); $("loginCaptcha").textContent=G.captcha; }
+
+/* ============ flow: login ============ */
+function goLogin(){ showScreen("login"); $("loginAccount").value=""; $("loginMsg").textContent=""; $("loginMsg").className="msg"; }
+function loginSubmitAccount(){
+  const acc=$("loginAccount").value.trim();
+  const r=validAccount(acc);
+  if(r!=="ok"){ $("loginMsg").textContent=accErrMsg(r); $("loginMsg").className="msg err"; return; }
+  const u=findUser(acc);
+  if(!u){ $("loginMsg").textContent=t("accNotExist"); $("loginMsg").className="msg err"; return; }
+  if(!u.state){ $("loginMsg").textContent=t("accLocked"); $("loginMsg").className="msg err"; return; }
+  $("loginMsg").textContent=t("accFound"); $("loginMsg").className="msg ok";
+  G.pendingAccount=acc; G.loginFails=0;
+  setTimeout(()=>{
+    $("login-step-account").style.display="none";
+    $("login-step-pass").style.display="block";
+    $("loginMsg2").textContent=""; $("loginPass").value=""; $("loginCode").value="";
+    refreshCaptcha();
+  },500);
+}
+function loginSubmitPass(){
+  const u=findUser(G.pendingAccount);
+  const pass=$("loginPass").value; const code=$("loginCode").value.trim();
+  if(code===G.captcha){ /* captcha ok */ }
+  else { $("loginMsg2").textContent=t("codeWrong"); $("loginMsg2").className="msg err"; refreshCaptcha(); return; }
+  if(validPassword(pass)!=="ok"){ $("loginMsg2").textContent=passErrMsg(validPassword(pass)); $("loginMsg2").className="msg err"; return; }
+  if(pass!==u.password){
+    G.loginFails++;
+    if(G.loginFails>=3){ u.state=false; saveUsers(); $("loginMsg2").textContent=t("lockedMsg"); $("loginMsg2").className="msg err";
+      setTimeout(()=>showScreen("home"),1800); return; }
+    $("loginMsg2").textContent=t("wrongPass")+" ("+G.loginFails+"/3)"; $("loginMsg2").className="msg err"; return;
+  }
+  $("loginMsg2").textContent=t("loginOk"); $("loginMsg2").className="msg ok";
+  setTimeout(()=>beginGame(u.account),600);
+}
+
+/* ============ flow: register ============ */
+function goRegister(){ showScreen("register"); ["regAccount","regPass","regPass2"].forEach(id=>$(id).value=""); $("regMsg").textContent=""; $("regMsg").className="msg"; }
+function regSubmit(){
+  const acc=$("regAccount").value.trim();
+  const r=validAccount(acc);
+  if(r!=="ok"){ $("regMsg").textContent=accErrMsg(r); $("regMsg").className="msg err"; return; }
+  if(findUser(acc)){ $("regMsg").textContent=t("accExists"); $("regMsg").className="msg err"; return; }
+  const p1=$("regPass").value, p2=$("regPass2").value;
+  const pr=validPassword(p1);
+  if(pr!=="ok"){ $("regMsg").textContent=passErrMsg(pr); $("regMsg").className="msg err"; return; }
+  if(p1!==p2){ $("regMsg").textContent=t("confirmMismatch"); $("regMsg").className="msg err"; return; }
+  G.users.push({account:acc,password:p1,state:true}); saveUsers();
+  $("regMsg").textContent=t("regOk"); $("regMsg").className="msg ok";
+  setTimeout(()=>goLogin(),1000);
+}
+
+/* ============ flow: guest ============ */
+function goGuest(){ beginGame("user"); }
+
+/* ============ character creation ============ */
+let CHAR_NAME="";
+function beginGame(name){
+  CHAR_NAME=name;
+  showScreen("char");
+  $("charNameLine").textContent=t("nameIs",name);
+  ["allocHp","allocAtk","allocDef"].forEach(id=>$(id).value=0);
+  allocChanged();
+}
+function allocChanged(){
+  let h=+allocHp.value, a=+allocAtk.value, d=+allocDef.value;
+  let sum=h+a+d, left=20-sum;
+  if(left<0){
+    // clamp the one just changed
+    if(this&&this.id==="allocHp"){ h=20-a-d; allocHp.value=h; }
+    else if(this&&this.id==="allocAtk"){ a=20-h-d; allocAtk.value=a; }
+    else if(this&&this.id==="allocDef"){ d=20-h-a; allocDef.value=d; }
+    sum=h+a+d; left=20-sum;
+  }
+  $("valHp").textContent=h; $("valAtk").textContent=a; $("valDef").textContent=d;
+  $("pointsLeft").textContent=left;
+  $("prevHp").textContent=100+h*10; $("prevAtk").textContent=10+a*2; $("prevDef").textContent=d;
+  $("startBattleBtn").disabled=left<0;
+}
+function startCharacter(){
+  const h=+allocHp.value,a=+allocAtk.value,d=+allocDef.value;
+  G.player={ name:CHAR_NAME, maxHp:100+h*10, hp:100+h*10, attack:10+a*2, defence:d,
+    skills:t("skills") };
+  G.count=1; G.win=0;
+  // base enemies (stats match the Java version)
+  G.enemies=[
+    {name:t("enemies")[0].name,maxHp:80,hp:80,attack:15,defence:10,skill:"super attack",defending:false},
+    {name:t("enemies")[1].name,maxHp:60,hp:60,attack:20,defence:5,skill:"rapid attack",defending:false},
+    {name:t("enemies")[2].name,maxHp:120,hp:120,attack:10,defence:20,skill:"defending",defending:false},
+    {name:t("enemies")[3].name,maxHp:70,hp:70,attack:25,defence:8,skill:"fire",defending:false}
+  ];
+  log("sys",t("charOk"));
+  log("sys",t("origAttr",attrStr(G.player)));
+  log("sys",t("origSkill",G.player.skills.join(t("skillSep"))));
+  startBattle();
+}
+
+/* ============ combat ============ */
+function calcDamage(atk,def){ let d=atk-def; if(d<=0) d=1; return d; }
+function attrStr(c){ return t("attrFmt",c.name,c.hp,c.attack,c.defence); }
+function rnd(n){ return Math.floor(Math.random()*n); }
+
+function startBattle(){
+  if(G.count>1){
+    G.enemies.forEach(e=>{ e.maxHp+=10; e.hp=e.maxHp; e.attack+=3; e.defence+=2; });
+  }
+  G.round=1;
+  const idx=rnd(G.enemies.length);
+  G.enemy=Object.assign({},G.enemies[idx]); G.enemy.defending=false; G.enemy.hp=G.enemy.maxHp;
+  showScreen("battle");
+  $("battleLog").innerHTML="";
+  log("me",t("enemyIs",enemyName(G.enemy)));
+  log("sys","=== "+t("gameStart")+" ===");
+  log("sys",t("count",G.count));
+  renderBattle(); enableActions(true); $("continueBox").style.display="none";
+}
+function enemyName(e){ return e.name; }
+
+function renderBattle(){
+  const p=G.player, e=G.enemy;
+  $("enemyName").textContent=enemyName(e);
+  $("roundTag").textContent=t("round",G.round);
+  $("pHpLabel").textContent=t("you"); $("eHpLabel").textContent=enemyName(e);
+  const pPct=Math.max(0,p.hp/p.maxHp*100), ePct=Math.max(0,e.hp/e.maxHp*100);
+  $("pHpFill").style.width=pPct+"%"; $("eHpFill").style.width=ePct+"%";
+  $("pHpText").textContent=p.hp+"/"+p.maxHp; $("eHpText").textContent=e.hp+"/"+e.maxHp;
+  // disable super/heal when hp<=10
+  $("actSuper").disabled = p.hp<=10;
+  $("actHeal").disabled = p.hp<=10;
+}
+function enableActions(on){
+  $("actAtk").disabled=!on;
+  if(on){ renderBattle(); } else { $("actSuper").disabled=true; $("actHeal").disabled=true; }
+}
+
+function log(cls,text){ const d=document.createElement("p"); d.className=cls; d.textContent=text; const box=$("battleLog"); box.appendChild(d); box.scrollTop=box.scrollHeight; }
+
+function playerAction(type){
+  if(!G.enemy || G.enemy.hp<=0 || G.player.hp<=0) return;
+  const p=G.player, e=G.enemy;
+  enableActions(false);
+  log("me",t("yourTurn"));
+  if(type==="attack"){
+    const dmg=calcDamage(p.attack,e.defence); takeOnEnemy(dmg);
+    log("me",t("atkUse",dmg,enemyName(e)));
+  } else if(type==="super"){
+    if(p.hp<=10){ log("me",t("superUse")+t("superLow")); }
+    else { log("me",t("superUse")+t("superLost")); p.hp-=10; if(p.hp<0)p.hp=0;
+      const dmg=calcDamage(Math.round(p.attack*1.8),e.defence); takeOnEnemy(dmg);
+      log("me",t("superDealt",dmg,enemyName(e))); }
+  } else if(type==="heal"){
+    if(p.hp<=10){ log("me",t("healUse")+t("healLow")); }
+    else { const h=rnd(11); p.hp=Math.min(p.maxHp,p.hp+h); log("me",t("healUse")+t("healRec",h)); }
+  }
+  renderBattle();
+  if(e.hp<=0){ winBattle(); return; }
+  setTimeout(enemyTurn,650);
+}
+
+function enemyTurn(){
+  const p=G.player, e=G.enemy;
+  if(p.hp<=0) return;
+  log("foe",t("foeTurn",enemyName(e)));
+  let action="normal attack";
+  if(rnd(2)===1) action=e.skill;
+  log("foe",t("foeUses",enemyName(e),t("enemySkills")[action]||action));
+  if(action==="normal attack"){
+    const d=calcDamage(e.attack,p.defence); p.hp-=d; log("foe",t("foeDeal",enemyName(e),d));
+  } else if(action==="super attack"){
+    const d=calcDamage(Math.round(e.attack*1.5),p.defence); p.hp-=d; log("foe",t("foeDeal",enemyName(e),d));
+  } else if(action==="rapid attack"){
+    let d=0; for(let i=0;i<2;i++) d+=calcDamage(Math.round(e.attack*0.75),p.defence); p.hp-=d; log("foe",t("foeDeal",enemyName(e),d));
+  } else if(action==="defending"){
+    e.defending=true; log("foe",t("foeDef",enemyName(e)));
+  } else if(action==="fire"){
+    const d=calcDamage(Math.round(e.attack*1.8),p.defence); p.hp-=d; log("foe",t("foeDeal",enemyName(e),d));
+  }
+  if(p.hp<0)p.hp=0;
+  renderBattle();
+  if(p.hp<=0){ setTimeout(loseGame,500); return; }
+  G.round++; renderBattle(); enableActions(true);
+}
+
+/* enemy takeDamage with defending */
+function takeOnEnemy(dmg){
+  const e=G.enemy;
+  if(e.defending){ dmg=Math.max(1,Math.floor(dmg/2)); e.defending=false; }
+  e.hp-=dmg; if(e.hp<0)e.hp=0;
+}
+function winBattle(){
+  const p=G.player,e=G.enemy;
+  G.win++;
+  log("win",t("youWin",enemyName(e)));
+  // post-battle heal 20-40
+  const h=20+rnd(21); p.hp=Math.min(p.maxHp,p.hp+h); log("sys",t("recovered",h));
+  // boost every 3 wins
+  if(G.win%3===0){ p.maxHp+=30; p.attack+=5; p.defence+=3;
+    log("sys",t("threeWin")); log("sys",t("boost")); log("sys",t("yourAttr",attrStr(p))); }
+  renderBattle();
+  $("continueBox").style.display="grid";
+  enableActions(false);
+}
+function continueBattle(){ G.count++; startBattle(); }
+function quitGame(){ gameOver(); }
+function loseGame(){ log("foe",t("youLose")); setTimeout(gameOver,700); }
+function gameOver(){ showScreen("over"); $("overStat").textContent=t("defeated",G.win); }
+
+/* exit */
+function doExit(){ alert((LANG==="zh")?"感谢游玩！":"Thanks for playing!"); showScreen("home"); }
+
+/* ============ boot ============ */
+setLang("en");
+showScreen("home");
+</script>
+</body>
+</html>
